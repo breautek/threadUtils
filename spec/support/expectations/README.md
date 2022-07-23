@@ -1,0 +1,1 @@
+spec/support/expectations is a folder to hold files that contain test expectations.

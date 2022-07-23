@@ -1,0 +1,51 @@
+{
+  "name": "@totalpave/changeme",
+  "version": "0.0.0-dev",
+  "description": "TotalPave changeme",
+  "main": "lib/api.js",
+  "types": "lib/api.d.ts",
+  "scripts": {
+    "lint": "eslint --ext .ts,.tsx '?(src|spec)/**/*.?(ts|tsx)' --cache",
+    "docs": "typedoc --excludePrivate --includeVersion -readme ./README.md --out ./docs ./src/api.ts",
+    "build": "npm run lint && tsc",
+    "build:release": "tsc",
+    "changelog": "auto-changelog --output CHANGELOG.md -p --release-summary --ignore-commit-pattern chore",
+    "test": "npm run lint && jest",
+    "preversion": "npm test",
+    "version": "NODE_ENV=production npm run-script build:release && npm run-script docs && npm run changelog && git add CHANGELOG.md docs && git commit -m 'chore: changelog'",
+    "postversion": "git push && git push --tags"
+  },
+  "publishConfig": {
+    "registry": "https://registry.totalpave.com:48731"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/totalpave/changeme.git"
+  },
+  "author": "TotalPave Inc.",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "tslib": "2.4.0"
+  },
+  "contributors": [
+    {
+      "name": "Norman Breau",
+      "email": "norman.breau@totalpave.com"
+    }
+  ],
+  "devDependencies": {
+    "@totalpave/eslint-plugin": "6.0.2",
+    "@types/jest": "27.5.2",
+    "@types/node": "16.11.43",
+    "@typescript-eslint/eslint-plugin": "5.30.5",
+    "@typescript-eslint/parser": "5.30.5",
+    "auto-changelog": "2.4.0",
+    "eslint": "8.19.0",
+    "jest": "27.5.1",
+    "ts-jest": "27.1.5",
+    "ts-node": "10.8.2",
+    "typedoc": "0.23.6",
+    "typedoc-plugin-markdown": "3.13.3",
+    "typescript": "4.7.4"
+  }
+}

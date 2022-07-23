@@ -1,0 +1,2 @@
+spec/supports/resources is a folder to hold test files, for example a test CSV. Files that contain test expectations do NOT go here. See spec/support/expectations.
+You can also hold generated scripts that are programmatically ran in here.

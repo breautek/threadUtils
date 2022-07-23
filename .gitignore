@@ -1,0 +1,9 @@
+node_modules
+lib
+._*
+.DS_Store
+coverage
+.nyc_output
+.vscode
+.*cache
+*.tsbuildinfo

@@ -1,0 +1,8 @@
+spec
+jest.config.tsbuildinfo
+tsconfig*
+.eslintrc.json
+.eslintcache
+scripts
+coverage
+*.tgz

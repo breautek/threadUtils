@@ -1,0 +1,1 @@
+src/private is a folder to hold modules that should NOT be used outside of this repo.
