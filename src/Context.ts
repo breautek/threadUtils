@@ -4,8 +4,6 @@ import {WorkerContext, WorkerContextEvent} from './WorkerContext'
 import * as Thread from 'worker_threads';
 import * as Path from 'path';
 
-console.log(__filename);
-
 type PromiseResolveFunction<T> = (data: T | PromiseLike<T>) => void;
 type PromiseRejectFunction = (reason?: any) => void;
 
@@ -34,6 +32,8 @@ export class Context {
     private $idleWaitPromise: Promise<void>;
     private $idlePromiseWrapper: PromiseWrapper<void>;
     private $isActive: boolean;
+    private $cleanupPromise: Promise<void>
+    private $cleanupPWrapper: PromiseWrapper<void>;
 
     /**
      * 
@@ -68,8 +68,9 @@ export class Context {
         );
 
         worker.addListener(WorkerContextEvent.IDLE, () => {
-            console.log('WORKER IDLE?');
             this.$idling.push(worker);
+
+            this.$onIdle();
 
             if (this.$idlePromiseWrapper) {
                 this.$idlePromiseWrapper.resolve();
@@ -106,17 +107,23 @@ export class Context {
     public async execute(data: Array<any>, assumeOwnership?: boolean): Promise<void> {
         let queue = assumeOwnership ? data : data.slice();
         this.$isActive = true;
-        console.log('Q Length', queue.length);
         while (queue.length > 0) {
             if (this.$idling.length === 0) {
                 await this.$waitForAvailableWorker();
             }
 
             let worker: WorkerContext = this.$idling.pop();
-            console.log('Sending job...');
             worker.send(queue.pop());
         }
         this.$isActive = false;
+
+        this.$onIdle();
+
+        this.$cleanupPromise = new Promise((resolve, reject) => {
+            this.$cleanupPWrapper = new PromiseWrapper(resolve, reject);
+        });
+
+        await this.$cleanupPromise;
     }
 
     private async $waitForAvailableWorker(): Promise<void> {
@@ -129,8 +136,22 @@ export class Context {
         return this.$idleWaitPromise;
     }
 
-    public isActive(): boolean {
-        return this.$isActive;
+    private $onIdle(): void {
+        if (!this.$isActive) {
+            // Remove current idlers
+            while (this.$idling.length > 0) {
+                let worker: WorkerContext = this.$idling.pop();
+                let poolIdx: number = this.$workerPool.indexOf(worker);
+                if (poolIdx > -1) {
+                    this.$workerPool.splice(poolIdx, 1);
+                }
+                worker.destroy();
+            }
+
+            if (this.$cleanupPWrapper && this.$idling.length === 0 && this.$workerPool.length === 0) {
+                this.$cleanupPWrapper.resolve();
+            }
+        }
     }
 
     public async destroy(): Promise<void> {

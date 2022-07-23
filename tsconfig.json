@@ -17,6 +17,7 @@
         "**/*.spec.ts",
         "*/.spec.ts",
         "tests",
+        "test",
         "lib",
         "spec",
         "node_modules",
